@@ -27,14 +27,14 @@ def main(csv_path: str, target: str, dataset_name: str|None=None):
     model, metrics, model_name = run_automl_or_baseline(problem, pre, X_tr, y_tr, X_te, y_te)
 
     # save artifacts
-    os.makedirs("artefacts", exist_ok=True)
-    joblib.dump(model, f"artefacts/best_model_{run_id}.pkl")
-    write_json(metrics, f"artefacts/metrics_{run_id}.json")
+    os.makedirs("../artefacts", exist_ok=True)
+    joblib.dump(model, f"../artefacts/best_model_{run_id}.pkl")
+    write_json(metrics, f"../artefacts/metrics_{run_id}.json")
 
     # write report
     dsname = dataset_name or os.path.splitext(os.path.basename(csv_path))[0]
     md = make_markdown(dsname, problem, overview, plots, model_name, metrics)
-    report_path = f"reports/{dsname}_{run_id}.md"
+    report_path = f"../reports/{dsname}_{run_id}.md"
     with open(report_path, "w", encoding="utf-8") as f:
         f.write(md)
 
