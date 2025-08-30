@@ -4,6 +4,7 @@ from sklearn.metrics import accuracy_score, f1_score, mean_squared_error
 from sklearn.pipeline import Pipeline
 from sklearn.linear_model import LogisticRegression, Ridge
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
+import numpy as np
 
 
 
@@ -90,9 +91,9 @@ def run_automl_or_baseline(problem: str, preprocessor, X_train, y_train, X_test,
             pipe.fit(X_train, y_train)
             y_pred = pipe.predict(X_test)
             
-            rmse = mean_squared_error(y_test, y_pred, squared=False)
+            rmse = float(np.sqrt(mean_squared_error(y_test, y_pred))) 
             metrics = {"rmse": float(rmse)}
-            if (best is None) or (metrics["rmse"] < best[1]["rmse"]):
+            if best is None or metrics["rmse"] < best[2]["rmse"]:
                 best = (name, pipe, metrics)
         return best[1], best[2], best[0]
 

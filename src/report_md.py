@@ -2,6 +2,11 @@ from __future__ import annotations
 from tabulate import tabulate
 import os, json
 
+def _rel_for_report(img_path: str, report_dir: str = "reports") -> str:
+    # path relative to the folder where the .md is written
+    rel = os.path.relpath(img_path, start=report_dir)
+    return rel.replace("\\", "/")  # normalize for markdown
+
 def make_markdown(dataset_name: str, problem: str, overview: dict, plot_paths: list[str], model_name: str, metrics: dict) -> str:
     lines = [] #content
     lines += [f"# AutoML Agent Report - {dataset_name}"]
@@ -19,7 +24,7 @@ def make_markdown(dataset_name: str, problem: str, overview: dict, plot_paths: l
     if plot_paths:
         lines += ["## EDA Plots", ""]
         for p in plot_paths[:12]:
-            rel = os.path.relpath(p)
+            rel = _rel_for_report(p, report_dir="reports")
             lines += [f"![{os.path.basename(p)}]({rel})"]
         lines += [""]
     
