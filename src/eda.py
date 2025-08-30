@@ -29,7 +29,7 @@ def plot_distribution(df: pd.DataFrame, target: str) -> list[str]:
         df[c].hist(bins=30)
         plt.title(f"Histogram for {c} Column")
 
-        out = os.path.join(PLOT_DIR, f"hist_{c}".png) # set path for storing chart
+        out = os.path.join(PLOT_DIR, f"hist_{c}.png") # set path for storing chart
         plt.savefig(out, bbox_inches="tight")
         plt.close()
         paths.append(out)

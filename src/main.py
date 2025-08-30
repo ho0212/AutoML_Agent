@@ -1,8 +1,8 @@
 from __future__ import annotations
 import os, argparse, joblib
 from io_utils import ensure_dirs, load_csv, detect_problem_type, RUN_TS, write_json, save_run_log
-from eda import quick_overview, plot_distributions
-from preprocess import split_xy, build_transformer, make_splits
+from eda import quick_overview, plot_distribution
+from preprocess import split_train_target, build_transformer, make_splits
 from automl_or_baseline import run_automl_or_baseline
 from report_md import make_markdown
 
@@ -18,18 +18,18 @@ def main(csv_path: str, target: str, dataset_name: str|None=None):
     log["problem"] = problem
 
     overview = quick_overview(df, target)
-    plots = plot_distributions(df, target)
+    plots = plot_distribution(df, target)
 
-    X, y = split_xy(df, target)
+    X, y = split_train_target(df, target)
     pre, num_cols, cat_cols = build_transformer(X)
     X_tr, X_te, y_tr, y_te = make_splits(X, y)
 
     model, metrics, model_name = run_automl_or_baseline(problem, pre, X_tr, y_tr, X_te, y_te)
 
     # save artifacts
-    os.makedirs("artifacts", exist_ok=True)
-    joblib.dump(model, f"artifacts/best_model_{run_id}.pkl")
-    write_json(metrics, f"artifacts/metrics_{run_id}.json")
+    os.makedirs("artefacts", exist_ok=True)
+    joblib.dump(model, f"artefacts/best_model_{run_id}.pkl")
+    write_json(metrics, f"artefacts/metrics_{run_id}.json")
 
     # write report
     dsname = dataset_name or os.path.splitext(os.path.basename(csv_path))[0]

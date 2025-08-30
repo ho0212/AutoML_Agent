@@ -4,8 +4,8 @@ from sklearn.metrics import accuracy_score, f1_score, mean_squared_error
 from sklearn.pipeline import Pipeline
 from sklearn.linear_model import LogisticRegression, Ridge
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
-from autosklearn.classification import AutoSklearnClassifier
-from autosklearn.regression import AutoSklearnRegressor
+
+
 
 def run_automl_or_baseline(problem: str, preprocessor, X_train, y_train, X_test, y_test):
     """
@@ -16,6 +16,7 @@ def run_automl_or_baseline(problem: str, preprocessor, X_train, y_train, X_test,
     # Try Auto-sklearn 
     try:
         if problem == "Classification":
+            from autosklearn.classification import AutoSklearnClassifier
             model = Pipeline([
                 ("pre", preprocessor),
                 ("clf", AutoSklearnClassifier(time_left_for_this_task=180, per_run_time_limit=30))
@@ -29,6 +30,7 @@ def run_automl_or_baseline(problem: str, preprocessor, X_train, y_train, X_test,
             }
             return model, metrics, "AutoSklearnClassifier"
         else:
+            from autosklearn.regression import AutoSklearnRegressor
             model = Pipeline([
                 ("pre", preprocessor),
                 ("reg", AutoSklearnRegressor(time_left_for_this_task=180,per_run_time_limit=30))
@@ -62,8 +64,19 @@ def run_automl_or_baseline(problem: str, preprocessor, X_train, y_train, X_test,
                 "accuracy": float(accuracy_score(y_test, y_pred)),
                 "f1_macro": float(f1_score(y_test, y_pred, average="macro"))
             }
-            if (best is None) or (metrics["f1_macro"] > best[1]["f1_macro"]):
+
+            # Compare the current result with the current best result
+            if best is None:
                 best = (name, pipe, metrics)
+            else:
+                curr_f1 = metrics["f1_macro"]
+                curr_acc = metrics["accuracy"]
+                best_f1 = best[2]["f1_macro"]
+                best_acc = best[2]["accuracy"]
+
+                if (curr_f1 > best_f1) or (curr_f1 == best_f1 and curr_acc > best_acc):
+                    best = (name, pipe, metrics)
+
         return best[1], best[2], best[0]
     else:
         candidates = [

@@ -7,13 +7,13 @@ def make_markdown(dataset_name: str, problem: str, overview: dict, plot_paths: l
     lines += [f"# AutoML Agent Report - {dataset_name}"]
     lines += ["## Overview",
               f"- Problem Type: **{problem}**",
-              f"- Rows: {overview["n_rows"]}, Cols: {overview["n_cols"]}",
+              f"- Rows: {overview['n_rows']}, Cols: {overview['n_cols']}",
               f"- Target distribution (top): {str(dict(list(overview.get('target_value_counts', {}).items())[:5]))}",
               ""
               ]
     lines += ["## Missingness (top 10)",
               "```",
-              json.dumps({k:v for k,v in sorted(overview['missing_perc'].items(), key=lambda kv: kv[1], reverse=True)[:10]}, indent=2),
+              json.dumps({k:v for k,v in sorted(overview['missing_percentage'].items(), key=lambda kv: kv[1], reverse=True)[:10]}, indent=2),
               "```",
               ""]
     if plot_paths:

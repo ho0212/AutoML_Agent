@@ -27,7 +27,7 @@ def build_transformer(X: pd.DataFrame):
     # categorical pipeline
     cat_pipe = Pipeline([
         ("impute", SimpleImputer(strategy="most_frequent")),
-        ("onehot", OneHotEncoder(handle_unknown="ignore", sparse=True))
+        ("onehot", OneHotEncoder(handle_unknown="ignore", sparse_output=True))
     ])
 
     # transformer
