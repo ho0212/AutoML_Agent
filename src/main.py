@@ -6,6 +6,18 @@ from src.preprocess import split_train_target, build_transformer, make_splits
 from src.automl_or_baseline import run_automl_or_baseline
 from src.report_md import make_markdown
 
+def maybe_make_narrative(dsname, problem, overview, metrics, model_name):
+    use_llm = os.getenv("ENABLE_LLM_NARRATIVE", "0") == "1"
+    if not use_llm:
+        return None
+    
+    try:
+        from src.llm_narrative import generate_narrative
+        return generate_narrative(dsname, problem, overview, metrics, model_name)
+    except Exception as e:
+        print(f"[warn] LLM narrative disabled due to: {e}")
+        return None
+
 def main(csv_path: str, target: str, dataset_name: str|None=None):
     ensure_dirs()
     run_id = RUN_TS()
@@ -31,9 +43,12 @@ def main(csv_path: str, target: str, dataset_name: str|None=None):
     joblib.dump(model, f"artefacts/best_model_{run_id}.pkl")
     write_json(metrics, f"artefacts/metrics_{run_id}.json")
 
-    # write report
+    # LLM narrative
     dsname = dataset_name or os.path.splitext(os.path.basename(csv_path))[0]
-    md = make_markdown(dsname, problem, overview, plots, model_name, metrics)
+    narrative = maybe_make_narrative(dsname, problem, overview, metrics, model_name)
+
+    # write report
+    md = make_markdown(dsname, problem, overview, plots, model_name, metrics, narrative=narrative)
     report_path = f"reports/{dsname}_{run_id}.md"
     with open(report_path, "w", encoding="utf-8") as f:
         f.write(md)
