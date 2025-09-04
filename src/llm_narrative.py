@@ -1,20 +1,24 @@
 from __future__ import annotations
 import os, json
 from typing import Dict, Any
-from openai import OpenAI
+import google.generativeai as genai
 
-def _client() -> OpenAI:
-    api_key = os.getenv("OPENAI_API_KEY")
+SYSTEM_INSTRUCTIONS = (
+    "You are a data science assistant. Write a factual, concise narrative for a report.\n"
+    "Only use the numbers provided in the JSON context. Do not invent values.\n"
+    "Explain data shape, notable missingness, target balance (if classification),\n"
+    "what model won and how it likely helped (one sentence), and key metric(s).\n"
+    "Tone: professional, 10-15 sentences. Use plain Markdown, no emojis."
+)
+
+def _gemini_model():
+    api_key = os.getenv("GOOGLE_API_KEY")
     if not api_key:
-        raise RuntimeError("OPENAI_API_KEY not set")
-    
-    base_url = os.getenv("OPENAI_BASE_URL") # None for OpenAI
-    if base_url:
-        return OpenAI(api_key=api_key, base_url=base_url)
-    return OpenAI(api_key=api_key)
+        raise RuntimeError("GOOGLE_API_KEY not set")
+    genai.configure(api_key=api_key)
+    model_name = os.getenv("GEMINI_MODEL", "gemini-1.5-flash")
+    return genai.GenerativeModel(model_name, generation_config={"temperature": 0.2})
 
-def _model() -> str:
-    return os.getenv("OPENAI_MODEL", "gpt-3.5-turbo")
 
 def generate_narrative(dataset_name: str,
                        problem: str,
@@ -36,25 +40,21 @@ def generate_narrative(dataset_name: str,
         "selected_model": model_name,
         "metrics": metrics,
     }
-
-    sys_prompt = (
-        "You are a data science assistant. Write a factual, concise narrative for a report.\n"
-        "Only use the numbers provided in the JSON context. Do not invent values.\n"
-        "Explain data shape, notable missingness, target balance (if classification),\n"
-        "what model won and how it likely helped (one sentence), and key metric(s).\n"
-        "Tone: professional, 10 - 15 sentences. Use plain Markdown, no emojis."
-    )
-
     user_prompt = f"CONTEXT JSON:\n```json\n{json.dumps(context, indent=2)}\n```\nWrite the narrative now."
+    contents = f"{SYSTEM_INSTRUCTIONS}\n\n{user_prompt}"
 
-    client = _client()
-    model = _model()
-    resp = client.chat.completions.create(
-        model=model,
-        temperature=0.2,
-        messages=[
-            {"role": "system", "content": sys_prompt},
-            {"role": "user", "content": user_prompt},
-        ],
-    )
-    return resp.choices[0].message.content.strip()
+    model = _gemini_model()
+    resp = model.generate_content(contents)
+    
+    # handle possible SDK shapes
+    text = getattr(resp, "text", None)
+    if not text:
+        try:
+            text = resp.candidates[0].content.parts[0].text
+        except Exception:
+            text = ""
+    # safety block handling
+    if hasattr(resp, "prompt_feedback") and getattr(resp.prompt_feedback, "block_reason", None):
+        raise RuntimeError(f"Gemini blocked: {resp.prompt_feedback.block_reason}")
+
+    return (text or "").strip()
