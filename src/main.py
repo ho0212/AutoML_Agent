@@ -5,7 +5,9 @@ from src.eda import quick_overview, plot_distribution
 from src.preprocess import split_train_target, build_transformer, make_splits
 from src.automl_or_baseline import run_automl_or_baseline
 from src.report_md import make_markdown
+from dotenv import load_dotenv
 
+load_dotenv() # load environment parameters
 def maybe_make_narrative(dsname, problem, overview, metrics, model_name):
     use_llm = os.getenv("ENABLE_LLM_NARRATIVE", "0") == "1"
     if not use_llm:

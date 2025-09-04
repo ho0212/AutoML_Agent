@@ -6,8 +6,9 @@ import google.generativeai as genai
 SYSTEM_INSTRUCTIONS = (
     "You are a data science assistant. Write a factual, concise narrative for a report.\n"
     "Only use the numbers provided in the JSON context. Do not invent values.\n"
-    "Explain data shape, notable missingness, target balance (if classification),\n"
-    "what model won and how it likely helped (one sentence), and key metric(s).\n"
+    "Thoroughly Explain data shape, notable missingness, target balance (if classification),\n"
+    "what model won and how it likely helped (a few sentence), and key metric(s).\n"
+    "Also a direction how to improve the performance of model."
     "Tone: professional, 10-15 sentences. Use plain Markdown, no emojis."
 )
 
@@ -45,7 +46,7 @@ def generate_narrative(dataset_name: str,
 
     model = _gemini_model()
     resp = model.generate_content(contents)
-    
+
     # handle possible SDK shapes
     text = getattr(resp, "text", None)
     if not text:
