@@ -13,8 +13,8 @@ def detect_problem_type(df: pd.DataFrame, target: str) -> str:
     y = df[target]
     # identify whether the problem is classification or regression
     if (pd.api.types.is_numeric_dtype(y)) and (y.nunique() <= max(20, int(0.05*len(y)))):
-        return "Classification"
-    return "Regression"
+        return "classification"
+    return "regression"
 
 def ensure_dirs():
     """
