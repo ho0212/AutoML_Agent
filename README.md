@@ -55,8 +55,8 @@ The result is a **self-driving data scientist assistant** that outputs a polishe
 2. Add a `.env` file with your API key:
    ```bash
    ENABLE_LLM_NARRATIVE=1
-    GOOGLE_API_KEY=your_gemini_key
-    GEMINI_MODEL=model name
+   GOOGLE_API_KEY=your_gemini_key
+   GEMINI_MODEL=model name
 3. Run on Titanic dataset (classification):
    ```bash
    python -m src.main --csv data/titanic.csv --target Survived --name Titanic
