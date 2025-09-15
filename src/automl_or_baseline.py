@@ -25,7 +25,7 @@ def _metric(problem, y_true, y_pred):
         return {"rmse": float(np.sqrt(mean_squared_error(y_true, y_pred)))}
 
 def run_automl_or_baseline(problem: str, preprocessor, X_train, y_train, X_test, y_test,
-                           strategy: str = "baseline",
+                           strategy: str = "autosklearn",
                            candidates: Optional[List[str]] = None,
                            time_budget_sec: int = 180):
     """

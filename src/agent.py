@@ -94,7 +94,7 @@ def plan(overview: Dict[str,Any], problem: str) -> Dict[str,Any]:
     pp["one_hot_encode"] = _to_bool(pp.get("one_hot_encode"), True)
 
 
-    md.setdefault("strategy", "baseline")
+    md.setdefault("strategy", "autosklearn")
     
     if problem == "classification":
         allowed = {"LogisticRegression","RandomForestClassifier"}
